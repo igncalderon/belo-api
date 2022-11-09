@@ -4,13 +4,15 @@ import { OrdersSide } from "../utils/enums";
 
 export default class OkxService {
     okxDAO: OkxDAO;
-    fee: string;
-    spread: string;
+    fee: number;
+    spread: number;
+    expiration: number;
 
     constructor() {
         this.okxDAO = new OkxDAO();
-        this.fee = process.env.BELO_FEE!;
-        this.spread = process.env.BELO_SPREAD!;
+        this.fee = Number(process.env.BELO_FEE!);
+        this.spread = Number(process.env.BELO_SPREAD!);
+        this.expiration = Number(process.env.EXPIRATION_MS!)
     }   
   
     calculatePrice (orders: Array<Array<string>>, volume: number) {
@@ -28,7 +30,7 @@ export default class OkxService {
                 }
             }
         }        
-        price = price + price * (Number(this.fee) + Number(this.spread));
+        price = price + price * (this.fee +this.spread);
         return price.toFixed(4)
     }
 
@@ -42,7 +44,8 @@ export default class OkxService {
             volume,
             pair: pair,
             side: side === OrdersSide.buyer ? 'buyer' : 'seller',
-            date_created: Date.now()
+            date_created: Date.now(),
+            executed: false,
         })
         
         return { volume, price, pair, orderId: order.returnId() };
@@ -53,13 +56,14 @@ export default class OkxService {
         if(!orderById) throw new Error('Order ID not found')
 
         const { dataValues } = orderById;
-        const isExpired = Number(Date.now()) - Number(dataValues.date_created) > 60000 ? true : false;
-        if(isExpired) throw new Error('Order ID is expired')
+        const isExpired = Number(Date.now()) - Number(dataValues.date_created) > this.expiration ? true : false;
+        if(isExpired) throw new Error('Order ID expired')
         
-         const { pair, volume, side, price } = dataValues;
-        const { code, msg, data } = await this.okxDAO.swap(dataValues)
-        if(code !== '0') throw new Error(msg);
-
+        const { pair, volume, side, price, executed, id } = dataValues;
+        if(executed) throw new Error('Order ID was already executed');
+        const { code, data } = await this.okxDAO.swap(dataValues);
+        if(code !== '0') throw new Error(data[0].sMsg);
+        await Order.update({ executed: true }, { where: { id }});
         return { 
             idTransaction: data[0].ordId,
             pair,
