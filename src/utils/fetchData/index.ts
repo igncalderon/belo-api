@@ -24,8 +24,6 @@ async function fetchData (path: string, method: string, body: string, timeout: n
         });
         return response.data;
     } catch (error: any) {
-        console.log('holaxd', error);
-        
         throw Error(error);
     }
 }

@@ -32,9 +32,7 @@ export default class OkxService {
         return price.toFixed(4)
     }
 
-    async getEstimated (pair: string, volume: number, side: OrdersSide) {
-        console.log(side);
-        
+    async getEstimated (pair: string, volume: number, side: OrdersSide) {        
         if(side !== OrdersSide.buyer && side !== OrdersSide.seller) throw new Error('Invalid side');
         const { asks, bids, error } = await this.okxDAO.getOrders(pair);
         if(error) throw new Error(error);

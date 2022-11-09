@@ -27,7 +27,7 @@ app.get('/estimated', async (req: Request<{}, {}, {}, ReqQuery>, res: Response, 
   }
 });
 
-app.get('/swap/:orderId', async (req: Request<ReqParams, {}, {}, {}>, res: Response, next: NextFunction) => {
+app.post('/swap/:orderId', async (req: Request<ReqParams, {}, {}, {}>, res: Response, next: NextFunction) => {
   try {
     const { orderId } = req.params;
     const service = new OkxService();
