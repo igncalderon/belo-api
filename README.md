@@ -8,6 +8,8 @@ Posee fee y spread parametrizable
 Se autentifica en OKX
 Se utiliza un DB para guardar el precio estimado devuelto por OKX
 
+--------------------
+
 Endpoints:
 
 **POST /belo/api/estimated**
