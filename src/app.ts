@@ -17,9 +17,9 @@ sequelize.sync({ force: false }).then(() => {
   console.log('DataBase connected successfully');
 }).catch(err => console.log('Error connecting Database', err));
 
-app.use('/belo/api', router)
+app.use('/belo/api', router);
 
-function handleError(err: any, _req: Request, res: Response, _next: any) {
+function handleError(err: any, _req: Request, res: Response, _next: NextFunction) {
     res.status(err.statusCode || 500).send({ error: true, message: err.message });
 }
 

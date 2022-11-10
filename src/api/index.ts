@@ -9,7 +9,7 @@ router.post('/estimated', async (req: Request, res: Response, next: NextFunction
     const { pair, vol, side } = req.body;
     const service = new OkxService();
     const response = await service.getEstimated(pair, vol, side);
-    res.status(200).json(response)
+    res.status(200).json(response);
   } catch (err) {
     next(err);
   }
@@ -20,7 +20,7 @@ router.post('/swap/:orderId', async (req: Request, res: Response, next: NextFunc
     const { orderId } = req.params;
     const service = new OkxService();
     const response = await service.swapOrder(orderId)
-    res.status(200).json(response)
+    res.status(200).json(response);
   } catch (err) {
     next(err);
   }
