@@ -1,25 +1,12 @@
 import express from "express";
 import { Request, Response, NextFunction } from 'express';
 import OkxService from '../services/okx-service';
-import { OrdersSide } from "../utils/enums";
 
+const router = express();
 
-const app = express();
-
-interface ReqQuery {
-  pair: string,
-  vol: number,
-  side: OrdersSide,
-  orderId: string
-}
-
-interface  ReqParams {
-  orderId: number,
-}
-
-app.get('/estimated', async (req: Request<{}, {}, {}, ReqQuery>, res: Response, next: NextFunction) => {
-  try {
-    const { pair, vol, side } = req.query;
+router.post('/estimated', async (req: Request, res: Response, next: NextFunction) => {
+  try {   
+    const { pair, vol, side } = req.body;
     const service = new OkxService();
     const response = await service.getEstimated(pair, vol, side);
     res.status(200).json(response)
@@ -28,7 +15,7 @@ app.get('/estimated', async (req: Request<{}, {}, {}, ReqQuery>, res: Response, 
   }
 });
 
-app.post('/swap/:orderId', async (req: Request<ReqParams, {}, {}, {}>, res: Response, next: NextFunction) => {
+router.post('/swap/:orderId', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { orderId } = req.params;
     const service = new OkxService();
@@ -39,4 +26,4 @@ app.post('/swap/:orderId', async (req: Request<ReqParams, {}, {}, {}>, res: Resp
   }
 });
 
-export default app;
+export default router;

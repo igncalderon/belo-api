@@ -30,8 +30,9 @@ export default class OkxService {
                 }
             }
         }        
-        price = price + price * (this.fee +this.spread);
-        return price.toFixed(4)
+        price = price + price * this.spread;
+        price = price + price * this.fee;
+        return price.toFixed(4);
     }
 
     async getEstimated (pair: string, volume: number, side: OrdersSide) {        
@@ -43,7 +44,7 @@ export default class OkxService {
             price,
             volume,
             pair: pair,
-            side: side === OrdersSide.buyer ? 'buyer' : 'seller',
+            side,
             date_created: Date.now(),
             executed: false,
         })
@@ -51,19 +52,20 @@ export default class OkxService {
         return { volume, price, pair, orderId: order.returnId() };
     }
 
-    async swapOrder (orderId: number) {
+    async swapOrder (orderId: string) {
         const orderById = await Order.findOne({ where: { id: orderId }});
         if(!orderById) throw new Error('Order ID not found')
 
         const { dataValues } = orderById;
-        const isExpired = Number(Date.now()) - Number(dataValues.date_created) > this.expiration ? true : false;
+        const isExpired = Number(Date.now()) - Number(dataValues.date_created) > this.expiration;
         if(isExpired) throw new Error('Order ID expired')
         
         const { pair, volume, side, price, executed, id } = dataValues;
         if(executed) throw new Error('Order ID was already executed');
-        const { code, data } = await this.okxDAO.swap(dataValues);
+        const { code, data, sign } = await this.okxDAO.swap(dataValues);
         if(code !== '0') throw new Error(data[0].sMsg);
         await Order.update({ executed: true }, { where: { id }});
+        
         return { 
             idTransaction: data[0].ordId,
             pair,

@@ -15,7 +15,7 @@ export default class OkxDAO {
     }
 
     async swap(data: SwapData) {
-        const { pair, volume, side, price } = data;
+        const { pair, volume, side } = data;
         const url = '/api/v5/trade/order';
         const response = await fetchData(url, 'POST', JSON.stringify({
                 instId: pair,
