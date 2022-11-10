@@ -40,3 +40,15 @@ Response = {
     "side": "buyer",
     "volume": "10",
 }
+
+--------------------
+
+Se requiere de archivo .env con las siguientes variables
+
+OKX_BASE_URL = https://www.okx.com
+OKX_ACCESS_KEY = XXX
+OKX_ACCESS_PASSPHRASE = XXX
+OKX_SECRET_KEY = XXX
+EXPIRATION_MS = 60000
+BELO_FEE = 0.02
+BELO_SPREAD = 0.05
