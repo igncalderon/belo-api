@@ -27,7 +27,7 @@ Response = {
     "orderId": 16
 }
 
-** POST /belo/api/swap/:orderId**
+**POST /belo/api/swap/:orderId**
 
 Utilizando la orderId que devuelve el endpoint anterior, permite ejecutar esa orden en OKX y conocer el precio al cual se ejecuto la orden. Se valida que la orden no se haya expirado y que la orden exista y que la orden no haya sido ejecutada previamente
 
