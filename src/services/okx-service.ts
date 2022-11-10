@@ -43,7 +43,7 @@ export default class OkxService {
         if(side !== OrdersSide.buyer && side !== OrdersSide.seller) throw new Error('Invalid side');
         const { asks, bids, error } = await this.okxDAO.getOrders(pair);
         if(error) throw new Error(error);
-        const price = this.calculatePrice(side === OrdersSide.buyer ? bids : asks, volume)
+        const price = this.calculatePrice(side === OrdersSide.buyer ? bids : asks, volume);
         const order = await Order.create({
             price,
             volume,
@@ -58,11 +58,11 @@ export default class OkxService {
 
     async swapOrder (orderId: string) {
         const orderById = await Order.findOne({ where: { id: orderId }});
-        if(!orderById) throw new Error('Order ID not found')
+        if(!orderById) throw new Error('Order ID not found');
 
         const { dataValues } = orderById;
         const isExpired = Number(Date.now()) - Number(dataValues.date_created) > this.expiration;
-        if(isExpired) throw new Error('Order ID expired')
+        if(isExpired) throw new Error('Order ID expired');
         
         const { pair, volume, side, price, executed, id } = dataValues;
         if(executed) throw new Error('Order ID was already executed');

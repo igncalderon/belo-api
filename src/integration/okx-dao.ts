@@ -11,7 +11,7 @@ export default class OkxDAO {
     async getOrders(pair: string) {
         const url = `/api/v5/market/books?instId=${pair}&sz=400`;
         const { data, msg } = await fetchData(url, 'GET', '');
-        return data.length ? data[0] : { error: msg } ;
+        return data.length ? data[0] : { error: msg };
     }
 
     async swap(data: SwapData) {
