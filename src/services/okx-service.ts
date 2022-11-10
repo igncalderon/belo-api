@@ -15,6 +15,12 @@ export default class OkxService {
         this.expiration = Number(process.env.EXPIRATION_MS!)
     }   
   
+    addFees (price: number) {
+        price = price + price * this.spread;
+        price = price + price * this.fee;
+        return price;
+    }
+
     calculatePrice (orders: Array<Array<string>>, volume: number) {
         let count = 0;
         let price = 0;
@@ -30,9 +36,7 @@ export default class OkxService {
                 }
             }
         }        
-        price = price + price * this.spread;
-        price = price + price * this.fee;
-        return price.toFixed(4);
+        return this.addFees(price).toFixed(2);
     }
 
     async getEstimated (pair: string, volume: number, side: OrdersSide) {        
@@ -49,7 +53,7 @@ export default class OkxService {
             executed: false,
         })
         
-        return { volume, price, pair, orderId: order.returnId() };
+        return { volume, priceEstimated: price, pair, orderId: order.returnId() };
     }
 
     async swapOrder (orderId: string) {
@@ -62,16 +66,17 @@ export default class OkxService {
         
         const { pair, volume, side, price, executed, id } = dataValues;
         if(executed) throw new Error('Order ID was already executed');
-        const { code, data, sign } = await this.okxDAO.swap(dataValues);
+        const { code, data } = await this.okxDAO.swap(dataValues);
         if(code !== '0') throw new Error(data[0].sMsg);
+        const detailSwap = await this.okxDAO.detailSwap(data[0].ordId, pair);
+        const executedPrice = Number(detailSwap.data[0].fillPx);
         await Order.update({ executed: true }, { where: { id }});
-        
         return { 
             idTransaction: data[0].ordId,
             pair,
             volume,
             side,
-            price,
+            price: this.addFees(executedPrice).toFixed(2),
         };
     }
 }

@@ -27,4 +27,9 @@ export default class OkxDAO {
         }));
         return response;
     }
+    async detailSwap(ordId: string, instId: string) {
+        const url = `/api/v5/trade/order?ordId=${ordId}&instId=${instId}`;
+        const response = await fetchData(url, 'GET', null);
+        return response;
+    }
 }
