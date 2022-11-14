@@ -35,7 +35,7 @@ export default class OkxService {
                     price += Number(order[0]) * Number(order[1]) / volume;
                 }
             }
-        }        
+        }       
         return this.addFees(price).toFixed(2);
     }
 
@@ -71,7 +71,6 @@ export default class OkxService {
         if(code !== '0') throw new Error(data[0].sMsg);
         const detailSwap = await this.okxDAO.detailSwap(data[0].ordId, pair);
         const executedPrice = Number(detailSwap.data[0].fillPx);
-        console.log('hola', executedPrice);
         
         await Order.update({ executed: true }, { where: { id }});
         return { 
