@@ -125,7 +125,16 @@ describe('tests GET /belo/api/estimated', () => {
         expect(mockResponse.body.volume).toBe(10);
         expect(mockResponse.body.priceEstimated).toBe("21687.75");
     });
-
+    test('should return error if volume is not a positive number', async () => {
+        const mockResponse = await request(app)
+            .post("/belo/api/estimated")
+            .send({ pair: "BTC-USDT", vol: 0, side: "buyer" })
+        expect(mockResponse.statusCode).toBe(500);
+        expect(mockResponse.body).toEqual({
+            error: true,
+            message: "Volume must be greater than 0",
+        });
+    })
     test('should return invalid instrument ID',  async () => {
         const mockResponse = await request(app)
             .post("/belo/api/estimated")
@@ -150,7 +159,6 @@ describe('tests GET /belo/api/estimated', () => {
 });
 
 describe('tests POST /belo/api/swap/:orderId', () => {
-
     test('should do the estimated and confirm the swap only the first time', async () => {
         const mockEstimated = await request(app)
             .post("/belo/api/estimated")

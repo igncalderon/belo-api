@@ -16,8 +16,8 @@ export default class OkxService {
     }   
   
     addFees (price: number) {
-        price = price + price * this.spread;
-        price = price + price * this.fee;
+        price += price * this.spread;
+        price += price * this.fee;
         return price;
     }
 
@@ -28,18 +28,19 @@ export default class OkxService {
             if(count < volume) {
                 const partial = count + Number(order[1]);
                 if(partial >= volume) {
-                    price = price + Number(order[0]) * Number(volume - count) / volume;
+                    price += Number(order[0]) * Number(volume - count) / volume;
                     count = volume;
                 } else {
-                    count = count + Number(order[1]);
-                    price = price + Number(order[0]) * Number(order[1]) / volume;
+                    count += Number(order[1]);
+                    price += Number(order[0]) * Number(order[1]) / volume;
                 }
             }
         }        
         return this.addFees(price).toFixed(2);
     }
 
-    async getEstimated (pair: string, volume: number, side: OrdersSide) {        
+    async getEstimated (pair: string, volume: number, side: OrdersSide) {  
+        if(volume <= 0) throw new Error('Volume must be greater than 0')      
         if(side !== OrdersSide.buyer && side !== OrdersSide.seller) throw new Error('Invalid side');
         const { asks, bids, error } = await this.okxDAO.getOrders(pair);
         if(error) throw new Error(error);
@@ -47,7 +48,7 @@ export default class OkxService {
         const order = await Order.create({
             price,
             volume,
-            pair: pair,
+            pair,
             side,
             date_created: Date.now(),
             executed: false,
@@ -64,12 +65,14 @@ export default class OkxService {
         const isExpired = Number(Date.now()) - Number(dataValues.date_created) > this.expiration;
         if(isExpired) throw new Error('Order ID expired');
         
-        const { pair, volume, side, price, executed, id } = dataValues;
+        const { pair, volume, side, executed, id } = dataValues;
         if(executed) throw new Error('Order ID was already executed');
         const { code, data } = await this.okxDAO.swap(dataValues);
         if(code !== '0') throw new Error(data[0].sMsg);
         const detailSwap = await this.okxDAO.detailSwap(data[0].ordId, pair);
         const executedPrice = Number(detailSwap.data[0].fillPx);
+        console.log('hola', executedPrice);
+        
         await Order.update({ executed: true }, { where: { id }});
         return { 
             idTransaction: data[0].ordId,
